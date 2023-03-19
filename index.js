@@ -17,7 +17,7 @@ const restAPI = {
     }
 }
 
-async function getUsers() {
+const getUsers = async () => {
     const response = await restAPI.getUsers()
     return response.data
 }
@@ -27,14 +27,14 @@ const getPosts = async () => {
     return response.data
 }
 const getComments = async (postId) => {
-    const response = await restAPI.getComments(postId).catch(e => console.error(e))
+    const response = await restAPI.getComments(postId)
     return response.data
 }
 
 //username arg for append comments
 const formData = async (userName = null) => {
-    const usersFromServer = await getUsers().catch(e => console.error(e))
-    const postsFromServer = await getPosts().catch(e => console.error(e))
+    const usersFromServer = await getUsers().catch(e => {throw new Error(e)})
+    const postsFromServer = await getPosts().catch(e => {throw new Error(e)})
     const users = usersFromServer.map(u => {
         const posts = postsFromServer.filter(post => post.userId === u.id).map(p => ({
             id: p.id,
@@ -52,14 +52,14 @@ const formData = async (userName = null) => {
             posts,
         }
     })
-    await appendCommentsToUser(users, userName).catch(e => console.error(e))
+    await appendCommentsToUser(users, userName).catch(e => {throw new Error(e)})
     return users
 }
 const appendCommentsToUser = async (users, userName) => {
     for (const user of users) {
         if (user.name === userName) {
             user.posts = await Promise.all(user.posts.map(async p => {
-                const comments = await getComments(p.id).catch(e => console.error(e))
+                const comments = await getComments(p.id).catch(e => {throw new Error(e)})
                 return {...p, comments}
             }))
         }
